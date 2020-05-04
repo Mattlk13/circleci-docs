@@ -14,5 +14,5 @@ gem 'jekyll-assets'
 gem "rack", ">= 2.0.6"
 
 group :jekyll_plugins do
-  gem 'jekyll-algolia', '~> 1.0'
+  gem 'jekyll-algolia', '~> 1.4', '>= 1.4.11'
 end
