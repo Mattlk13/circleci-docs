@@ -6,6 +6,9 @@ categories: [configuration-tasks]
 description: Generating code coverage metrics
 order: 50
 sitemap: false
+version:
+- Cloud
+- Server v2.x
 ---
 
 Code Coverage tells you how much of your application is tested.
@@ -14,20 +17,24 @@ CircleCI provides a number of different options for code coverage reporting,
 using built-in CircleCI features combined with open source libraries,
 or using partners.
 
-* TOC 
+* TOC
 {:toc}
 
 
 # Viewing Coverage on CircleCI
+{: #viewing-coverage-on-circleci }
 
 You can upload your code coverage reports directly to CircleCI. First, add a
 coverage library to your project and configure your build to write the coverage
-report to CircleCI's [artifacts directory]({{ site.baseurl }}/2.0/artifacts/). CircleCI will upload coverage results and make them visible as part of your build.
+report to CircleCI's [artifacts directory]({{ site.baseurl }}/2.0/artifacts/). Code coverage reports will then be stored as build artifacts, from where they can be viewed or downloaded. See our [build artifacts]({{ site.baseurl }}/2.0/artifacts/) guide for more on accessing coverage reports.
+
+![artifacts tab screeshot]( {{ site.baseurl }}/assets/img/docs/artifacts.png)
 
 Here are a few examples to demonstrate configuring coverage libraries for
 different languages.
 
-## Ruby 
+## Ruby
+{: #ruby }
 
 [Simplecov](https://github.com/colszowka/simplecov) is a popular Ruby code
 coverage library. To get started, add the `simplecov` gem to your `Gemfile`
@@ -54,7 +61,7 @@ class ActiveSupport::TestCase
 end
 ```
 
-Now configure your `.circleci/config.yaml` for uploading your coverage report.
+Now configure your `.circleci/config.yml` for uploading your coverage report.
 
 ```yaml
 version: 2
@@ -62,9 +69,15 @@ jobs:
   build:
     docker:
       - image: circleci/ruby:2.5.3-node-browsers
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
         environment:
           RAILS_ENV: test
       - image: circleci/postgres:9.5-alpine
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
         environment:
           POSTGRES_USER: circleci-demo-ruby
           POSTGRES_DB: rails_blog
@@ -90,6 +103,7 @@ jobs:
 The [simplecov README](https://github.com/colszowka/simplecov/#getting-started) has more details.
 
 ## Python
+{: #python }
 
 [Coverage.py](https://coverage.readthedocs.io/en/v4.5.x/) is a popular library
 for generating Code Coverage Reports in python. To get started, install
@@ -126,6 +140,9 @@ jobs:
   build:
     docker:
     - image: circleci/python:3.7-node-browsers-legacy
+      auth:
+        username: mydockerhub-user
+        password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
     - checkout
     - run:
@@ -149,6 +166,7 @@ workflows:
 ```
 
 ## Java
+{: #java }
 
 [JaCoCo](https://github.com/jacoco/jacoco) is a popular library for Java code
 coverage. Below is an example pom.xml that includes JUnit and JaCoCo as part of
@@ -242,6 +260,9 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:11.0-stretch-node-browsers-legacy
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
       - run : mvn test
@@ -250,10 +271,11 @@ jobs:
 ```
 
 ## JavaScript
+{: #javascript }
 
 [Istanbul](https://github.com/gotwarlost/istanbul) is a popular library for generating code coverage reports for
 JavaScript projects. Another popular testing tool, Jest, uses Istanbul to
-generage reports. Consider this example:
+generate reports. Consider this example:
 
 ```yaml
 version: 2
@@ -261,6 +283,9 @@ jobs:
   build:
     docker:
       - image: circleci/node:10.0-browsers
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
       - run: npm install
@@ -272,6 +297,7 @@ jobs:
 ```
 
 ## PHP
+{: #php }
 
 PHPUnit is a popular testing framework for PHP. To generate code-coverage
 reports you may need to install [PHP Xdebug](https://xdebug.org/) if you are
@@ -288,6 +314,9 @@ jobs:
   build:
     docker:
       - image: circleci/php:7-fpm-browsers-legacy
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
       - run:
@@ -298,6 +327,7 @@ jobs:
 ```
 
 ## Golang
+{: #golang }
 
 Go has built-in functionality for generating code coverage reports. To generate
 reports, add the flag `-coverprofile=c.out`. This will generate a coverage
@@ -305,7 +335,7 @@ report which can be converted to html via `go tool`.
 
 ```sh
 go test -cover -coverprofile=c.out
-go tool cover -html=c.out -o coverage.html 
+go tool cover -html=c.out -o coverage.html
 ```
 
 An example `.circleci/config.yml`:
@@ -316,6 +346,9 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.11
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
       - run: go build
@@ -323,7 +356,7 @@ jobs:
           name: "Create a temp directory for artifacts"
           command: |
             mkdir -p /tmp/artifacts
-      - run: 
+      - run:
           command: |
             go test -coverprofile=c.out
             go tool cover -html=c.out -o coverage.html
@@ -333,9 +366,11 @@ jobs:
 ```
 
 
-# Using a Code Coverage Service
+# Using a code coverage service
+{: #using-a-code-coverage-service }
 
 ## Codecov
+{: #codecov }
 
 Codecov has an [orb](https://circleci.com/orbs) to help make uploading your coverage report easy.
 
@@ -353,11 +388,13 @@ jobs:
 Read more about Codecov's orb in their [guest blog post](https://circleci.com/blog/making-code-coverage-easy-to-see-with-the-codecov-orb/).
 
 ## Coveralls
+{: #coveralls }
 
 If you're a Coveralls customer, follow
-[their guide to set up your coverage stats.](https://coveralls.io/docs)
+[their guide to set up your coverage stats.](https://docs.coveralls.io/)
 You'll need to add `COVERALLS_REPO_TOKEN` to your CircleCI
 [environment variables]( {{ site.baseurl }}/1.0/environment-variables/).
 
 Coveralls will automatically handle the merging of coverage stats in
-parallel builds.
+concurrent jobs.
+

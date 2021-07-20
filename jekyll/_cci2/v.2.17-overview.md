@@ -7,9 +7,10 @@ categories: [getting-started]
 order: 1
 ---
 
-This document provides a summary of features and product notes for the release of CircleCI Server v2.17.
+This document provides a summary of features and product notes for the release of CircleCI Server v2.17. For a full list of changes, including patch releases, refer to the [changelog](https://circleci.com/server/changelog).
 
-## What's New in Release 2.17
+## What's new in release 2.17
+{: #whats-new-in-release-217 }
 
 * Workflows now has a Slack Integration! Users can choose to receive Slack notifications when their workflows complete.
 * Administrators can now restrict which organizations are allowed into their CircleCI installation. For more details on how to enable this feature, please see the User Management Section of the 2.17 Ops Manual.
@@ -18,12 +19,8 @@ This document provides a summary of features and product notes for the release o
 * Improved the cache in front of GraphQL API resulting in overall improved performance.
 * Added backpressure to avoid overwhelming nomad with requests, this will result in increased performance from existing nomad clusters.
 
-
-- PDF installation and operations documentation:
-   - [*CircleCI v2.17 Installation Guide*](https://circleci.com/docs/2.0/circleci-install-doc-v2-17.pdf)
-   - [*CircleCI v2.17 Operations Guide*](https://circleci.com/docs/2.0/circleci-ops-guide-v2-17.pdf)
-
-## Fixed in Release 2.17
+## Fixed in release 2.17
+{: #fixed-in-release-217 }
 
 * Fixed some bugs related to GitHub API response handling and webhook handling.
 * Fixed issue with Scheduled Workflows when the services machine is restarted.
@@ -35,12 +32,13 @@ This document provides a summary of features and product notes for the release o
 * Fixed a bug causing Workflows to get stuck when infrastructure_failure happens after a job fails.
 * Fixed a bug causing duplicate docker networks on same nomad client (if running build using machine:true AND vm-provider=on_host).
 * Improved performance when using local storage. Previously, caching issues had been experienced when local storage was used rather than the default option of using S3 (selecting None under * Storage Driver options from the Management Console).
-* We have added more error checking and validation around Github’s API so the existing list commit endpoint no longer causes issues.
+* We have added more error checking and validation around GitHub’s API so the existing list commit endpoint no longer causes issues.
 * Datadog API token field was stored in plaintext, now set as a password field.
 * Fixed issue where workflows were constrained from fanning out to large number of jobs.
 
 
-## Updated in Release 2.17
+## Updated in release 2.17
+{: #updated-in-release-217 }
 
 * New machine executor AMIs based on Ubuntu 16.04 for AWS.
   Ubuntu 16.04 with Docker 18.09.3 has apt-daily and apt-daily-upgrade services disabled.
@@ -92,23 +90,43 @@ This document provides a summary of features and product notes for the release o
 
 * We are removing the 1.0 Single-Box options from CircleCI 2.0. We found a few critical vulnerabilities in our 1.0 build image, and we have long stopped recommending it for trials. If this is absolutely critical to your workflow please reach out to us. This does not impact people who are running 1.0 in clustered mode.
 
-## Updating
+## Steps to update to CircleCI Server v2.17
+{: #steps-to-update-to-circleci-server-v217 }
 Steps to update to CircleCI Server v2.17 are as follows:
 
-1. Check you are running Docker v17.12.1, and if not update (steps in section below)
-2. Update Replicated to v2.34.1 (steps in section below)
-3. Navigate to your Management Console dashboard (e.g. `https://<your-circleci-hostname>.com:8800`) and select the v2.17 upgrade
+1. Take a snapshot of your installation so you can rollback later if necessary (optional but recommended)
+2. Check you are running Docker v17.12.1 and update if necessary
+3. Update Replicated to v2.34.1 (steps in section below)
+4. Navigate to your Management Console dashboard (e.g. `<your-circleci-hostname>.com:8800`) and select the v2.17 upgrade
 
-### Prequisites for Updating Replicated
+### Snapshot for rollback
+{: #snapshot-for-rollback }
+
+To take a snapshot of your installation:
+
+1. Go to the Management Console (`<circleci-hostname>.com:8800`) and click Stop Now to stop the CircleCI Services machine from running
+2. Ensure no jobs are running on the nomad clients – check by running `nomad status`
+3. Navigate to the AWS EC2 management console and select your Services machine instance
+4. Select Actions > Image > Create Image – Select the No Reboot option if you want to avoid downtime at this point. This image creation step creates an AMI that can be readily launched as a new EC2 instance to restore your installation.
+**Note:** It is also possible to automate this process with the AWS API. Subsequent AMIs/snapshots are only as large as the difference (changed blocks) since the last snapshot, such that storage costs are not necessarily larger for more frequent snapshots, see Amazon's EBS snapshot billing document for details.
+Once you have the snapshot you are free to make changes on the Services machine.
+
+If you do need to rollback at any point, see our [restore from backup](http://localhost:4000/docs/2.0/backup/#restoring-from-backup) guide.
+
+### Update Replicated
+{: #update-replicated }
+
+**Perquisites**
 
 - Your installation is Ubuntu 14.04 or 16.04 based.
 - You are running replicated version 2.10.3<= on your services machine
   - replicated --version
 - Your installation is **not** airgapped and you can access the internet from it
 - All steps are completed on the Services machine
-- Verify what version of replicated you need to update to by viewing the (Server Changelog)[https://circleci.com/server/changelog/]
+- Verify what version of replicated you need to update to by viewing the [Server Changelog](https://circleci.com/server/changelog/)
 
-### Preparations
+#### Preparations for updating Replicated
+{: #preparations-for-updating-replicated }
 
 Before performing a replicated version update, backup your data using the [Backup instructions]({{site.baseurl}}/2.0/backup/).
 
@@ -152,7 +170,8 @@ Example Output:
     sudo apt-mark hold docker-ce
 ```
 
-### Update
+#### Update Replicated
+{: #update-replicated }
 
 Perform the Replicated update by executing the update script as follows:
 

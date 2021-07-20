@@ -1,39 +1,48 @@
 ---
 layout: classic-docs
-title: コードカバレッジメトリクスの生成
-short-title: コードカバレッジメトリクスの生成
-categories: [configuration-tasks]
-description: コードカバレッジメトリクスの生成
+title: コード カバレッジ メトリクスの生成
+short-title: コード カバレッジ メトリクスの生成
+categories:
+  - configuration-tasks
+description: コード カバレッジ メトリクスの生成
 order: 50
 sitemap: false
+version:
+  - Cloud
+  - Server v2.x
 ---
 
-コードカバレッジは、アプリケーションがどの程度テストされたかを示します。
+コード カバレッジは、アプリケーションがどの程度テストされたかを示します。
 
-CircleCI は、組み込みの CircleCI 機能をオープンソースライブラリと組み合わせて、またはパートナーのサービスを使用して、コードカバレッジレポートのさまざまなオプションを提供しています。
+CircleCI は、組み込みの CircleCI 機能をオープンソース ライブラリと組み合わせて、またはパートナーのサービスを使用して、コード カバレッジ レポートのさまざまなオプションを提供しています。
 
 * 目次
 {:toc}
 
 
 # CircleCI でのカバレッジの表示
+{: #viewing-coverage-on-circleci }
 
-コードカバレッジレポートを直接 CircleCI にアップロードできます。 最初に、プロジェクトにカバレッジライブラリを追加し、CircleCI の[アーティファクトディレクトリ]({{ site.baseurl }}/ja/2.0/artifacts/)にカバレッジレポートを書き込むようにビルドを設定します。 CircleCI は、カバレッジの結果をアップロードし、ビルドの一部として表示できるようにします。
+コード カバレッジ レポートを直接 CircleCI にアップロードできます。 最初に、プロジェクトにカバレッジ ライブラリを追加し、CircleCI の[アーティファクト ディレクトリ]({{ site.baseurl }}/ja/2.0/artifacts/)にカバレッジ レポートを書き込むようにビルドを構成します。 コード カバレッジ レポートはビルド アーティファクトとして、参照またはダウンロード可能な場所に保存されます。 カバレッジ レポートへのアクセス方法の詳細については、[ビルド アーティファクトに関するドキュメント]({{ site.baseurl }}/ja/2.0/artifacts/)を参照してください。
 
-カバレッジライブラリを設定する例を言語ごとにいくつか示します。
+![[Artifacts (アーティファクト)] タブのスクリーンショット]( {{ site.baseurl }}/assets/img/docs/artifacts.png)
+
+言語別にカバレッジ ライブラリを構成する例をいくつか示します。
 
 ## Ruby
+{: #ruby }
 
-[SimpleCov](https://github.com/colszowka/simplecov) は、よく使用される Ruby コードカバレッジライブラリです。 最初に、`simplecov` gem を `Gemfile` に追加します。
+[SimpleCov](https://github.com/colszowka/simplecov) は、よく使用される Ruby コード カバレッジ ライブラリです。 最初に、`simplecov` gem を `Gemfile` に追加します。
 
-    gem 'simplecov', require: false, group: :test
+```
+gem 'simplecov', require: false, group: :test
+```
 
-
-テストスイートの開始時に `simplecov` を実行します。 simplecov を Rails と共に使用する場合の設定例を以下に示します。
+テスト スイートの開始時に `simplecov` を実行します。 SimpleCov を Rails と共に使用する場合の構成例を以下に示します。
 
 ```ruby
 require 'simplecov'        # << simplecov が必要です
-SimpleCov.start 'rails'    # << "Rails" プリセットを使用して simplecov を起動します
+SimpleCov.start 'rails'    # << "Rails" プリセットを使用して SimpleCov を起動します
 
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
@@ -42,11 +51,20 @@ require 'rails/test_help'
 class ActiveSupport::TestCase
   # すべてのテストの test/fixtures/*.yml にあるすべてのフィクスチャをアルファベット順にセットアップします
   fixtures :all
-  # すべてのテストで使用されるヘルパーメソッドをここに追加します...
+  # すべてのテストで使用されるヘルパー メソッドをここに追加します...
+
+ENV['RAILS_ENV'] ||= 'test'
+require_relative '../config/environment'
+require 'rails/test_help'
+
+class ActiveSupport::TestCase
+  # すべてのテストの test/fixtures/*.yml にあるすべてのフィクスチャをアルファベット順にセットアップします
+  fixtures :all
+  # すべてのテストで使用されるヘルパー メソッドをここに追加します...
 end
 ```
 
-次に、カバレッジレポートをアップロードするために `.circleci/config.yaml` を設定します。
+次に、カバレッジ レポートをアップロードするために `.circleci/config.yaml` を設定します。
 
 ```yaml
 version: 2
@@ -64,40 +82,42 @@ jobs:
     steps:
       - checkout
       - run:
-          name: バンドルインストール
+          name: バンドル インストール
           command: bundle check || bundle install
       - run:
-          name: DB を待機
+          name: DB の待機
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: データベースのセットアップ
           command: bin/rails db:schema:load --trace
       - run:
-          name: テストを実行
+          name: テストの実行
           command: bin/rails test
       - store_artifacts:
           path: coverage
 ```
 
-[simplecov README](https://github.com/colszowka/simplecov/#getting-started) に、さらに詳細な説明があります。
+この[例](https://github.com/pallets/flask/tree/1.0.2/examples/tutorial)では、以下のコマンドを使用してカバレッジ レポートを生成できます。
 
 ## Python
+生成されたファイルは `htmlcov/` 下にあり、設定ファイルの `store_artifacts` ステップでアップロードできます。
 
-[Coverage.py](https://coverage.readthedocs.io/en/v4.5.x/) は、Python でコードカバレッジレポートを生成する際によく使用されるライブラリです。 最初に、以下のように Coverage.py をインストールします。
+[Coverage.py](https://coverage.readthedocs.io/en/v4.5.x/) は、Python でコード カバレッジ レポートを生成する際によく使用されるライブラリです。 最初に、以下のように Coverage.py をインストールします。
 
 ```sh
 pip install coverage
 ```
 
 ```sh
-# これまでは、たとえば以下のように python プロジェクトを実行していました
+# これまでは、たとえば以下のように Python プロジェクトを実行していました
 python my_program.py arg1 arg2
 
 # ここでは、コマンドにプレフィックス "coverage" を付けます
 coverage run my_program.py arg1 arg2
+coverage run my_program.py arg1 arg2
 ```
 
-この[例](https://github.com/pallets/flask/tree/1.0.2/examples/tutorial)では、以下のコマンドを使用してカバレッジレポートを生成できます。
+In this [example](https://github.com/pallets/flask/tree/1.0.2/examples/tutorial), you can generate a coverage report with the following commands:
 
 ```sh
 coverage run -m pytest
@@ -105,7 +125,7 @@ coverage report
 coverage html  # ブラウザーで htmlcov/index.html を開きます
 ```
 
-生成されたファイルは `htmlcov/` 下にあり、コンフィグの `store_artifacts` ステップでアップロードできます。
+上記の例に対応する最小の CI 構成は以下のとおりです。
 
 ```yaml
 version: 2
@@ -116,12 +136,12 @@ jobs:
     steps:
     - checkout
     - run:
-        name: テスト環境をセットアップ
+        name: テスト環境のセットアップ
         command: |
           pip install '.[test]' --user
           echo $HOME
     - run:
-        name: テストを実行
+        name: テストの実行
         command: |
           $HOME/.local/bin/coverage run -m pytest
           $HOME/.local/bin/coverage report
@@ -136,8 +156,9 @@ workflows:
 ```
 
 ## Java
+{: #java }
 
-[JaCoCo](https://github.com/jacoco/jacoco) は、Java コードカバレッジによく使用されるライブラリです。 ビルドシステムの一部に JUnit と JaCoCo を含む pom.xml の例を以下に示します。
+[JaCoCo](https://github.com/jacoco/jacoco) は、Java コード カバレッジによく使用されるライブラリです。 ビルド システムの一部に JUnit と JaCoCo を含む pom.xml の例を以下に示します。
 
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -197,7 +218,23 @@ workflows:
                             <!-- 実行データを含むファイルのパスを設定します -->
 
                             <dataFile>target/jacoco.exec</dataFile>
-                            <!-- コードカバレッジレポートの出力ディレクトリを設定します -->
+                            <!-- コード カバレッジ レポートの出力ディレクトリを設定します -->
+                            <outputDirectory>target/my-reports</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project> -->
+
+                            <dataFile>target/jacoco.exec</dataFile>
+                            <!-- コード カバレッジ レポートの出力ディレクトリを設定します -->
                             <outputDirectory>target/my-reports</outputDirectory>
                         </configuration>
                     </execution>
@@ -214,9 +251,9 @@ workflows:
 
 ```
 
-`mvn test` を実行するとコードカバレッジレポート (`exec`) ファイルが生成され、他の多くのカバレッジツールと同様に、このファイルが `html` ページにも変換されます。 上記の Pom ファイルは `target` ディレクトリに書き込みを行い、これを CircleCI `config.yml` ファイルでアーティファクトとして保存できます。
+`mvn test` を実行するとコード カバレッジ レポート (`exec`) ファイルが生成され、他の多くのカバレッジ ツールと同様に、このファイルが `html` ページにも変換されます。 上記の Pom ファイルは `target` ディレクトリに書き込みを行い、これを CircleCI `config.yml` ファイルでアーティファクトとして保存できます。
 
-上記の例に対応する最小の CI 設定は以下のとおりです。
+Here is a  minimal CI configuration to correspond with the above example:
 
 ```yaml
 version: 2
@@ -232,8 +269,9 @@ jobs:
 ```
 
 ## JavaScript
+`.circleci/config.yml` の例は以下のとおりです。
 
-[Istanbul](https://github.com/gotwarlost/istanbul) は、JavaScript プロジェクトでコードカバレッジレポートの生成によく使用されるライブラリです。 人気のテストツールである Jest でも、Istanbul を使用してレポートを生成します。 以下のコード例を参照してください。
+[Istanbul](https://github.com/gotwarlost/istanbul) は、JavaScript プロジェクトでコード カバレッジ レポートの生成によく使用されるライブラリです。 人気のテスト ツールである Jest でも、Istanbul を使用してレポートを生成します。 以下のコード例を参照してください。
 
 ```yaml
 version: 2
@@ -245,17 +283,19 @@ jobs:
       - checkout
       - run: npm install
       - run:
-          name: "Jest を実行し、カバレッジレポートを収集"
+          name: "Jest の実行とカバレッジ レポートの収集"
           command: jest --collectCoverage=true
       - store_artifacts:
           path: coverage
 ```
 
 ## PHP
+Codecov の Orb の詳細については、[CircleCI ブログへの寄稿記事](https://circleci.com/blog/making-code-coverage-easy-to-see-with-the-codecov-orb/)を参照してください。
 
-PHPUnit は、よく使用される PHP のテストフレームワークです。 PHP 5.6 よりも前のバージョンを使用している場合、コードカバレッジレポートを生成するには、<a href=」https://xdebug.org/">PHP Xdebug</a> のインストールが必要になります。PHP 5.6 以降では、phpdbg ツールにアクセスでき、`phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report` コマンドを使用してレポートを生成できます。
+PHPUnit は、よく使用される PHP のテスト フレームワークです。 PHP 5.6 以前のバージョンを使用している場合、コード カバレッジ レポートの生成には、[PHP Xdebug](https://xdebug.org/) のインストールが必要になります。 PHP 5.6 以降では、phpdbg ツールにアクセスでき、`phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report` コマンドを使用してレポートを生成できます。
 
-以下に示した基本の `.circleci/config.yml` では、コンフィグの最後にある `store_artifacts` ステップでカバレッジレポートをアップロードしています。
+Coveralls は、並列ビルドのカバレッジ統計を自動的にマージします。
+
 
 ```yaml
 version: 2
@@ -266,35 +306,36 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "テストを実行"
+          name: "テストの実行"
           command: phpdbg -qrr vendor/bin/phpunit --coverage-html build/coverage-report
       - store_artifacts:
           path:  build/coverage-report
 ```
 
 ## Golang
+{: #golang }
 
-Go には、コードカバレッジレポートを生成する機能が組み込まれています。 レポートを生成するには、`-coverprofile=c.out` フラグを追加します。 これでカバレッジレポートが生成され、`go tool` を使用して html に変換できます。
+Go には、コード カバレッジ レポートを生成する機能が組み込まれています。 レポートを生成するには、`-coverprofile=c.out` フラグを追加します。 これでカバレッジ レポートが生成され、`go tool` を使用して html に変換できます。
 
 ```sh
 go test -cover -coverprofile=c.out
 go tool cover -html=c.out -o coverage.html
 ```
 
-`.circleci/config.yml` の例は以下のとおりです。
-
+以下に示した基本の `.circleci/config.yml` では、設定ファイルの末尾にある `store_artifacts` ステップでカバレッジ レポートをアップロードしています。
 ```yaml
 version: 2.1
 
 jobs:
   build:
     docker:
+
       - image: circleci/golang:1.11
     steps:
       - checkout
       - run: go build
       - run:
-          name: "アーティファクト用の一時ディレクトリを作成"
+          name: "アーティファクト用の一時ディレクトリの作成"
           command: |
             mkdir -p /tmp/artifacts
       - run:
@@ -306,11 +347,14 @@ jobs:
           path: /tmp/artifacts
 ```
 
-# コードカバレッジサービスの使用
+
+# コード カバレッジ サービスの使用
+{: #using-a-code-coverage-service }
 
 ## Codecov
+{: #codecov }
 
-Codecov には、カバレッジレポートのアップロードを簡単に行うための [Orb](https://circleci.com/orbs) があります。
+Codecov には、カバレッジ レポートのアップロードを簡単に行うための [Orb](https://circleci.com/ja/orbs) があります。
 
 ```yaml
 version: 2.1
@@ -323,10 +367,12 @@ jobs:
           file: {{ coverage_report_filepath }}
 ```
 
-Codecov の Orb の詳細については、[CircleCI ブログへの寄稿記事](https://circleci.com/blog/making-code-coverage-easy-to-see-with-the-codecov-orb/)を参照してください。
+Read more about Codecov's orb in their [guest blog post](https://circleci.com/blog/making-code-coverage-easy-to-see-with-the-codecov-orb/).
 
 ## Coveralls
+{: #coveralls }
 
-Coveralls のユーザーは、[カバレッジ統計の設定ガイド](https://coveralls.io/docs)を参照してください。CircleCI の[環境変数]({{ site.baseurl }}/1.0/environment-variables/)に `COVERALLS_REPO_TOKEN` を追加する必要があります。
+Coveralls のユーザーは、[カバレッジ統計のセットアップ ガイド](https://coveralls.io/docs)を参照してください。 CircleCI の[環境変数]({{ site.baseurl }}/1.0/environment-variables/)に `COVERALLS_REPO_TOKEN` を追加する必要があります。
 
-Coveralls は、並列ビルドのカバレッジ統計を自動的にマージします。
+Coveralls will automatically handle the merging of coverage stats in concurrent jobs.
+

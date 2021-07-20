@@ -3,7 +3,7 @@
 ## Single Job
 
 ```sh
-curl https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num?circle-token=:token
+curl https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num -H "Circle-Token: <circle-token>"
 ```
 
 ```json
@@ -94,7 +94,7 @@ This is also the payload for the notification webhooks, in which case this objec
 ## Retry a Build
 
 ```sh
-curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/retry?circle-token=:token
+curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/retry -H "Circle-Token: <circle-token>"
 
 ```
 
@@ -136,7 +136,7 @@ curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/
 
 
 ```sh
-curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/ssh-users?circle-token=:token
+curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/ssh-users -H "Circle-Token: <circle-token>"
 ```
 
 ```text
@@ -149,7 +149,7 @@ curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/
 ## Cancel a Build
 
 ```sh
-curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/cancel?circle-token=:token
+curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/cancel -H "Circle-Token: <circle-token>"
 ```
 
 ```json
@@ -188,15 +188,15 @@ curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/
 
 ## Trigger a new Job
 ```sh
-curl -X POST --header "Content-Type: application/json" -d '{
+curl -X POST --header "Content-Type: application/json" -H "Circle-Token: <circle-token>" -d '{
   "tag": "v0.1", // optional
   "parallel": 2, //optional, default null
   "build_parameters": { // optional
     "RUN_EXTRA_TESTS": "true"
   }
-}
+}'
 
-https://circleci.com/api/v1.1/project/:vcs-type/:username/:project?circle-token=:token
+https://circleci.com/api/v1.1/project/:vcs-type/:username/:project
 ```
 
 ```json
@@ -284,19 +284,20 @@ tag | The tag to build. Default is null. Cannot be used with revision parameter.
 parallel | The number of containers to use to run the build. Default is null and the project default is used. This parameter is ignored for builds running on our 2.0 infrastructure.
 build_parameters | Additional environment variables to inject into the build environment. A map of names to values.
 
+**Note** Triggering a new job is not currently supported with configurations that specify `version: 2.1`.
 
-## Trigger a new Build with a Branch
+## Trigger a new Job with a Branch
 
 ```sh
-curl -X POST --header "Content-Type: application/json" -d '{
+curl -X POST --header "Content-Type: application/json" -H "Circle-Token: <circle-token>" -d '{
   "parallel": 2, //optional, default null
   "revision": "f1baeb913288519dd9a942499cef2873f5b1c2bf" // optional
   "build_parameters": { // optional
     "RUN_EXTRA_TESTS": "true"
   }
-}
+}'
 
-https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/tree/:branch?circle-token=:token
+https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/tree/:branch
 ```
 
 ```json
@@ -375,7 +376,7 @@ https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/tree/:branch?
 **`POST` Request:** Triggers a new build and then returns a summary of the build.
 
 <aside class="notice">
-For more about build parameters, see 2.0 build parameters <a href="https://circleci.com/docs/2.0/env-vars/#injecting-environment-variables-with-the-api">for environment variables</a>. The response for “failed” should be a boolean true or null.
+For more about build parameters, see 2.0 build parameters <a href="https://circleci.com/docs/2.0/env-vars/#injecting-environment-variables-with-api-v1">for environment variables</a>. The response for “failed” should be a boolean `true` or `null`.
 </aside>
 
 **Parameter** | **Description**
@@ -384,11 +385,12 @@ revision | The specific revision to build. Default is null and the head of the b
 parallel | The number of containers to use to run the build. Default is null and the project default is used. This parameter is ignored for builds running on our 2.0 infrastructure.
 build_parameters | Additional environment variables to inject into the build environment. A map of names to values.
 
+**Note** Triggering a new job with a branch is not currently supported with configurations that specify `version: 2.1`.
 
 ## Trigger a new Build by Project (preview)
 
 ```sh
-curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/build?circle-token=:token
+curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/build -H "Circle-Token: <circle-token>"
 ```
 
 ```json
@@ -403,6 +405,7 @@ curl -X POST https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/
 
 <aside class="notice">
 Prerequisite: You must go to your Project Settings in the CircleCI app and enable pipelines. This endpoint does not yet support the <code>build_parameters</code> options that the job-triggering endpoint supports.
+This also means that this endpoint is not available for CircleCI Server.
 </aside>
 
 **Parameter** | **Description**
@@ -416,7 +419,7 @@ tag | The git tag to build. Cannot be used with branch and revision parameters.
 ## Get Build Test Metadata
 
 ```sh
-curl https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/tests?circle-token=:token
+curl https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/:build_num/tests -H "Circle-Token: <circle-token>"
 ```
 
 ```json

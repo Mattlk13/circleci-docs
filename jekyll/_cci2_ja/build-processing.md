@@ -1,45 +1,61 @@
 ---
 layout: classic-docs
-title: "パイプライン"
+title: "パイプラインの有効化"
 short-title: "パイプラインの有効化"
 description: "パイプラインを有効にする方法"
 categories:
   - settings
 order: 1
+version:
+  - Cloud
 ---
 
-ここでは、CircleCI API または自動キャンセルのワークフローからワークフローをトリガーする必要がある場合に、パイプラインエンジンを有効にする方法を説明します。
+CircleCI API または自動キャンセルのワークフローからワークフローをトリガーする必要がある場合に、パイプライン エンジンを有効化する方法を説明します。 パイプラインは、現在オンプレミス版の CircleCI Server ではサポートされていません。
 
-## はじめよう
+* 目次
+{:toc}
 
-CircleCI アプリケーションでパイプラインを有効にします。この設定は、プロジェクトの [Settings (設定)] ページの [Advanced (詳細設定)] セクションの下部にあります。
+## はじめに
+{: #what-are-pipelines }
 
-新しいパイプライン機能を使用すると、[ワークフローを含むビルドをトリガーする新しい API エンドポイント]({{ site.baseurl }}/api/v1-reference/#new-project-build)を使用して、以下のユースケースに対応できるようになります。
+CircleCI Pipelines encompass the full set of workflows you run when triggering work on your projects in CircleCI. Workflows coordinate the jobs defined within your project configuration.
 
-- 新しい API エンドポイントを使用してビルドをトリガーし、ビルド内のすべてのワークフローを実行します。
-- `build` という名前のジョブが、プロセッサーによって 1つのワークフロースタンザにラップされます。
-- [Advanced Settings (詳細設定)] で自動キャンセルが有効になっているプロジェクトでは、非デフォルトのブランチで新しいビルドがトリガーされると、同じブランチ上のワークフローがキャンセルされます。
-- バージョン 2.1 以上の設定を使用するには、パイプラインをオンにする必要があります。
+## パイプラインのメリット
+パイプライン機能を使用すると、[ワークフローを含むビルドをトリガーする新しい API エンドポイント](https://circleci.com/docs/api/#trigger-a-new-build-by-project-preview)を使用して、以下のユース ケースに対応できるようになります。
 
-**メモ：**非デフォルトのブランチで自動デプロイジョブを設定している場合などには、自動キャンセル機能を有効にすることの影響を慎重に検討する必要があります。
+Pipelines offer the following benefits:
+
+{% include snippets/pipelines-benefits.adoc %}
 
 ## トラブルシューティング
+{: #implications-of-pipelines }
 
-パイプラインエラーは、[Workflows (ワークフロー)] ページの [Jobs (ジョブ)] ページに表示されます。 既存のプロジェクトをパイプラインに移行する際、ジョブまたはワークフローが新しいパイプラインサービスで失敗する場合は、プロジェクトの [Advanced Settings (詳細設定)] でパイプラインのラジオボタンを無効にすることで、安全に元に戻すことができます。
+When using pipelines, please note the following:
 
-## 制約
+- アンカーは、アプリケーションの設定ファイルに表示されることなく、処理されて解決されます。
 
-CircleCI では、ほとんどの場合に下位互換性が維持されており、パイプラインを有効にしたプロジェクトの大部分で既存のビルドに影響はありません。 以前は機能していたビルドが、パイプラインを有効にしたことで機能しなくなる場合は、CircleCI にご連絡ください。
+## 制限事項
+このセクションでは、パイプラインへの移行プロセスについて概説します。
 
-- アンカーは、アプリケーションコンフィグに表示されることなく、処理されて解決されます。
-- シェルコマンドで `<<` を使用する場合 (ヒアドキュメントを使用する場合など)、バージョン 2.1 以上の設定を使用するには、`\<<` のようにバックスラッシュ `` でエスケープする必要があります。
-- パイプラインは、任意のジョブをトリガーする 1.1 API エンドポイントと完全には下位互換性が**ありません**。パイプラインをオンにした後にこのエンドポイントを使用すると、予期しない結果または不整合な結果となる可能性があります。 代わりに、2018年 9月に 1.1 API で導入された、[ビルドをトリガーするエンドポイント](https://circleci.com/docs/api/v1-reference/#new-project-build)を使用できます。 このビルドをトリガーする API エンドポイントは、パラメーター、ワークフロー、ジョブフィルターを受け付け**ない**ので、ご注意ください。 パイプラインと併せてこれらの API 機能を多用したいとお考えでしたら、CircleCI のアカウントチームにお問い合わせください。
+The following sections outline the process of transitioning to pipelines.
 
-## フィードバック方法
+### 2.0 構成でのパイプライン
+{: #pipelines-with-20-configuration }
+{:.no_toc}
 
-1. CircleCI の Twitter アカウント (@circleci) 宛てにツイートする
-2. [アイデアボード](https://ideas.circleci.com/)で既存の投稿に投票する、または投稿を追加する
+2.0 構成でパイプラインを使用する場合、CircleCI では `CIRCLE_COMPARE_URL` 環境変数がすべてのジョブに挿入され、下位互換性が確保されます。 この環境変数は、従来のジョブで使用可能な環境変数とは異なる方法で生成され、いつでも使用できるわけではありません。 たとえば、空のリポジトリへのコミットを初めてプッシュした場合や、追加のコミットなしに新しいブランチが作成/プッシュされた場合など、以前のリビジョンが存在しない場合は挿入されません。
 
-## 関連項目
+## パイプラインへの移行
+バージョン `2.1` 構成を使用すると、パイプラインが自動的に有効になり、[パイプライン値](https://circleci.com/ja/docs/2.0/pipeline-variables/#パイプライン値)など、`2.1` 専用の機能を利用できるようになります。
+{:.no_toc}
 
-詳細については、[ビルドのスキップとキャンセル]({{ site.baseurl }}/ja/2.0/skip-build/#冗長ビルドの自動キャンセル)のページを参照してください。
+If you have feedback, suggestions, or comments:
+
+- CircleCI の Twitter アカウント (@CircleCIJapan) 宛てにツイートする
+- [アイデア ボード](https://ideas.circleci.com/)で既存の投稿に投票する、または投稿を追加する
+
+## ブランチでのパイプラインのオプトイン
+{: #see-also }
+{:.no_toc}
+
+詳細については、「[ビルドのスキップとキャンセル]({{ site.baseurl }}/ja/2.0/skip-build/#冗長ビルドの自動キャンセル)」を参照してください。

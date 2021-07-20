@@ -1,46 +1,60 @@
 ---
 layout: classic-docs
-title: "Pipelines"
+title: "Working with Pipelines"
 short-title: "Enabling Pipelines"
-description: "How to enable pipelines"
+description: "How to work effectively with CircleCI pipelines"
 categories: [settings]
 order: 1
+version:
+- Cloud
 ---
 
-This document describes how to enable the pipelines engine if you need to trigger workflows from the CircleCI API or auto-cancel workflows.
+This document describes how to enable the pipelines engine if you need to trigger workflows from the CircleCI API or auto-cancel workflows. Pipelines are not currently available on self hosted installations of CircleCI Server.
 
-## Getting Started
-Enable pipelines at the bottom of the Advanced section of Settings page for your project in the CircleCI app. **Note:** Pipelines require v2.1 configuration and are not yet supported for private CircleCI Server installations.
+* TOC
+{:toc}
 
-## Benefits of Pipelines
+## What are pipelines?
+{: #what-are-pipelines }
 
-The pipelines feature enables use of the new [API endpoint to trigger builds with workflows](https://circleci.com/docs/api/#trigger-a-new-build-by-project-preview) and the following use cases:
+CircleCI Pipelines encompass the full set of workflows you run when triggering work on your projects in CircleCI. Workflows coordinate the jobs defined within your project configuration.
 
-- New API endpoint to trigger builds, including running all workflows in the build.
-- Jobs named `build` will be wrapped in a workflows stanza by the processor.
-- Projects for which auto-cancel is enabled in the Advanced Settings will have workflows on non-default branches cancelled when a newer build is triggered on that same branch.
-- Use of configuration version 2.1 or higher requires pipelines to be turned on.
+## Benefits of using pipelines
+{: #benefits-of-using-pipelines }
 
-**Notes:** It is important to carefully consider the impact of enabling the auto-cancel feature, for example, if you have configured automated deployment jobs on non-default branches.
+Pipelines offer the following benefits:
 
-## Troubleshooting
+{% include snippets/pipelines-benefits.adoc %}
 
-Pipeline errors will appear on the Jobs page or the Workflows page.
+## Implications of pipelines
+{: #implications-of-pipelines }
 
-Please note that once pipelines are enabled for a project on a usage plan, they may not be
-turned off without filing a ticket with CircleCI support. See `limitations` below.
+When using pipelines, please note the following:
 
-## Limitations
-CircleCI is committed to achieving backwards compatibility in almost all cases, and most projects that enable pipelines will have no effect on existing builds. Let us know if you experience breaking builds that worked before you turned on pipelines, but broke after you turned it on.
+- If no builds or workflows are defined, you will receive an error.
 
-- Anchors will be processed and resolved instead of appearing in the app config.
-- If you use `<<` in your shell commands (most commonly found in use of heredocs) you will need to escape them using backslash `\` as in `\<<` in order to use version 2.1 or higher of configuration. 2.0 configuration will not be affected.
-- Pipelines are **not** fully backwards-compatible with the 1.1 API endpoint to trigger arbitrary jobs - you may experience unexpected or inconsistent results if you use this endpoint after turning on Pipelines. Alternatively, you can use the [build-triggering endpoint in the 1.1 API](https://circleci.com/docs/api/#trigger-a-new-build-by-project-preview) introduced in September 2018. Please keep in mind that this build triggering API endpoint does **not** accept parameters or workflow or job filters. If you make heavy use of those API features and want to use Pipelines, please contact your CircleCI account team.
+## Transitioning to pipelines
+{: #transitioning-to-pipelines }
 
-## Giving Feedback
-1. Tweet @circleci with thoughts
-2. Vote or add to our [Ideas board](https://ideas.circleci.com/)
+The following sections outline the process of transitioning to pipelines.
 
-## See Also
+### Pipelines with 2.0 configuration
+{: #pipelines-with-20-configuration }
+{:.no_toc}
+
+When using 2.0 configuration in combination with pipelines, CircleCI will inject the `CIRCLE_COMPARE_URL` environment variable into all jobs for backwards compatibility. This environment variable is generated in a different way to the version that is available in legacy jobs, and is not always available – it is not injected when there is no meaningful previous revision, for example, on the first push of commits to an empty repository, or when a new branch is created/pushed without any additional commits.
+
+## Giving feedback
+{: #giving-feedback }
+{:.no_toc}
+
+If you have feedback, suggestions, or comments:
+
+- Tweet @circleci with thoughts
+- Vote or add to our [Ideas board](https://ideas.circleci.com/)
+
+## See also
+{: #see-also }
+{:.no_toc}
 
 Refer to the [Skipping and Cancelling Builds]({{ site.baseurl }}/2.0/skip-build/#auto-cancelling-a-redundant-build) document for more details.
