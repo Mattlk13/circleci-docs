@@ -14,7 +14,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@optimizely/optimizely-sdk": "4.6.2",
+    "@optimizely/optimizely-sdk": "4.10.0",
     "@popperjs/core": "^2.10.1",
     "highlightjs-badge": "0.1.9",
     "jquery": "3.6.0",
@@ -33,8 +33,8 @@
     "markdownlint-cli2": "0.0.15",
     "markdownlint-cli2-formatter-json": "0.0.4",
     "markdownlint-rule-header-id": "0.0.3",
-    "uglifyjs-webpack-plugin": "1.1.2",
-    "webpack": "4.19.1",
-    "webpack-cli": "3.1.0"
+    "uglifyjs-webpack-plugin": "1.3.0",
+    "webpack": "5.94.0",
+    "webpack-cli": "3.3.12"
   }
 }
